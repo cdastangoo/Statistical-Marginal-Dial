@@ -17,9 +17,12 @@ function StatisticalDial() {
 	*/
 	var sTitle, sTitleFormat, sTitleColor;
 	var sMetricType, sMetricLabel, sMetricValue;
+	
 	var dMetric, dMetricRed, dMetricYellow;
 	var dMetricArrow, dMetricMin, dMetricMax, dMetricRange;
-	var lsLabels, lsData, ldData;
+	var dRealMetricArrow, dRealMetricRed, dRealMetricYellow;
+	
+	var lsLabels, lsData, ldData, ldDial;
 	var bLowerIsGreen, lcBackground, lcHover;
 	
 	//dMetric = httpGet("dMetric");
@@ -28,12 +31,43 @@ function StatisticalDial() {
 	//sMetricValue = dMetric.toString();
 	//sMetricType = httpGet("sMetricType");
 	
-	// test values
-	dMetric = 4.2;
-	dMetricRed = 3.6;
-	dMetricYellow = 4.5;
+	/*
+	 * TEST VALUES without Get Requests
+	 *
+	 * cpk:
+	 * dMetricRed = 1.0
+	 * dMetricYellow = 1.5
+	 *     RED:    0.0 < dMetric < 1.0
+	 *     YELLOW: 1.0 < dMetric < 1.5
+	 *     GREEN:  1.5 < dMetric < 3.0
+	 *
+	 * zscore:
+	 * dMetricRed = 3.0
+	 * dMetricYellow = 4.5
+	 *     RED:    0.0 < dMetric < 3.0
+	 *     YELLOW: 3.0 < dMeric < 4.5
+	 *     GREEN:  4.5 < dMetric < 6.0
+	 *
+	 * pnc:
+	 * dMetricYellow = 0.001
+	 * dMetricRed = 0.1
+	 *     GREEN:  0.000001 < dMetric < 0.001
+	 *     YELLOW: 0.001 < dMetric < 0.01
+	 *     RED:    dMetric > 0.01
+	 *
+	 * dpmo:
+	 * dMetricYellow = 10.0
+	 * dMetricRed = 1000.0
+	 *     GREEN:  0.01 < dMetric < 10.0
+	 *     YELLOW: 10.0 < dMetric < 1000.0
+	 *     RED:    dMetric > 1000.0
+	 */
+	
+	dMetric = 1000.0;
+	dMetricRed = 1000.0;
+	dMetricYellow = 10.0;
 	sMetricValue = dMetric.toString();
-	sMetricType = "zscore";
+	sMetricType = "dpmo";
 	
 	switch(sMetricType) {
 		case "cpk":
@@ -50,10 +84,13 @@ function StatisticalDial() {
 			sMetricLabel = "Z Score";
 			bLowerIsGreen = false;
 			break;
-		// pnc doesn't work atm
+		// pnc doesn't work properly atm
 		case "pnc":
 			dMetricMin = -6.0;
 			dMetricMax = 2.0;
+			dRealMetricArrow = dMetric;
+			dRealMetricRed = dMetricRed;
+			dRealMetricYellow = dMetricYellow;
 			if (dMetric > 0.000001) {
 				dMetric = Math.log(dMetric) / Math.log(10);
 			}
@@ -76,9 +113,12 @@ function StatisticalDial() {
 			sMetricLabel = "PNC";
 			bLowerIsGreen = true;
 			break;
-		default:
+		case "dpmo":
 			dMetricMin = -2.0;
 			dMetricMax = 6.0;
+			dRealMetricArrow = dMetric;
+			dRealMetricRed = dMetricRed;
+			dRealMetricYellow = dMetricYellow;
 			if (dMetric > 0.01) {
 				dMetric = Math.log(dMetric) / Math.log(10);
 			}
@@ -100,6 +140,9 @@ function StatisticalDial() {
 			dMetricArrow = dMetric;
 			sMetricLabel = "DPMO";
 			bLowerIsGreen = true;
+			break;
+		default:
+			console.log("Invalid metric type");
 	}
 	
 	if (dMetric > dMetricMax) {
@@ -134,34 +177,52 @@ function StatisticalDial() {
 		}
 	}
 	
+	console.log(dMetricMin);
+	
 	dMetricRange = dMetricMax - dMetricMin;
+	// pnc or dpmo (logarithmic scale)
 	if (bLowerIsGreen) {
-		if (dMetricArrow >= dMetricRed) {
-			sTitle = "Risk: " + sMetricLabel + " = " + sMetricValue;
-			sTitleColor = "red";
-			lsLabels = ["Green", "Yellow", "Red", sMetricLabel, "Red"];
-			lsData = [dMetricMin, dMetricYellow, dMetricRed, dMetricArrow, dMetricRed];
-			ldData = [dMetricYellow / dMetricRange, (dMetricRed - dMetricYellow) / dMetricRange, (dMetricArrow - dMetricRed) / dMetricRange, 0.01, (dMetricMax - dMetricArrow) / dMetricRange];
-			lcBackground = ['rgba(0, 255, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(255, 0, 0, 0.6)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 0, 0, 0.6)'];
-			lcHover = ['rgba(0, 255, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(255, 0, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 0, 0, 0.8)'];
-		}
-		else if (dMetricArrow >= dMetricYellow) {
-			sTitle = "Warning: " + sMetricLabel + " = " + sMetricValue;
-			sTitleColor = "#b0a602";
-			lsLabels = ["Green", "Yellow", sMetricLabel, "Yellow", "Red"];
-			lsData = [dMetricMin, dMetricYellow, dMetricArrow, dMetricYellow, dMetricRed];
-			ldData = [dMetricYellow / dMetricRange, (dMetricArrow - dMetricYellow) / dMetricRange, 0.01, (dMetricRed - dMetricYellow) / dMetricRange, (dMetricMax - dMetricRed) / dMetricRange];
-		}
-		else {
+		if (dMetricArrow <= dMetricYellow) {
+			// design value in Green zone
 			sTitle = "Opportunity: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "green";
 			lsLabels = ["Green", sMetricLabel, "Green", "Yellow", "Red"];
-			lsData = [dMetricMin, dMetricArrow, dMetricMin, dMetricYellow, dMetricRed];
-			ldData = [dMetricArrow / dMetricRange, 0.01, (dMetricYellow - dMetricArrow) / dMetricRange, (dMetricRed - dMetricYellow) / dMetricRange, (dMetricMax - dMetricRed) / dMetricRange];
+			lsData = [0, dRealMetricArrow, 0, dRealMetricYellow, dRealMetricRed];
+			ldData = [dMetricArrow - dMetricMin, 0.08, dMetricYellow - dMetricArrow, dMetricRed - dMetricYellow, dMetricMax - dMetricRed];
+			//ldData = [Math.abs(dMetricArrow) / dMetricRange, 0.01, Math.abs(dMetricYellow - dMetricArrow) / dMetricRange, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricMax - dMetricRed) / dMetricRange];
+			lcBackground = ['rgba(0, 255, 0, 0.6)', 'rgba(0, 0, 0, 0.6)', 'rgba(0, 255, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(255, 0, 0, 0.6)'];
+			lcHover = ['rgba(0, 255, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(0, 255, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(255, 0, 0, 0.8)'];
 		}
+		else if (dMetricArrow <= dMetricRed) {
+			// design value in Yellow zone
+			sTitle = "Warning: " + sMetricLabel + " = " + sMetricValue;
+			sTitleColor = "#b0a602";
+			lsLabels = ["Green", "Yellow", sMetricLabel, "Yellow", "Red"];
+			lsData = [0, dRealMetricYellow, dRealMetricArrow, dRealMetricYellow, dRealMetricRed];
+			ldData = [dMetricYellow - dMetricMin, dMetricArrow - dMetricYellow, 0.08, dMetricRed - dMetricArrow, dMetricMax - dMetricRed];
+			//ldData = [Math.abs(dMetricYellow) / dMetricRange, Math.abs(dMetricArrow - dMetricYellow) / dMetricRange, 0.01, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricMax - dMetricRed) / dMetricRange];
+			lcBackground = ['rgba(0, 255, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(255, 0, 0, 0.6)'];
+			lcHover = ['rgba(0, 255, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 255, 0, 0.8)', 'rgba(255, 0, 0, 0.8)'];
+		}
+		else {
+			// design value in Red zone
+			console.log(dMetricArrow);
+			sTitle = "Risk: " + sMetricLabel + " = " + dRealMetricArrow;
+			sTitleColor = "red";
+			lsLabels = ["Green", "Yellow", "Red", sMetricLabel, "Red"];
+			lsData = [0, dRealMetricYellow, dRealMetricRed, dRealMetricArrow, dRealMetricRed];
+			ldData = [dMetricYellow - dMetricMin, dMetricRed - dMetricYellow, dMetricArrow - dMetricRed, 0.08, dMetricMax - dMetricArrow];
+			//ldData = [Math.abs(dMetricYellow) / dMetricRange, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricArrow - dMetricRed) / dMetricRange, 0.01, Math.abs(dMetricMax - dMetricArrow) / dMetricRange];
+			lcBackground = ['rgba(0, 255, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(255, 0, 0, 0.6)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 0, 0, 0.6)'];
+			lcHover = ['rgba(0, 255, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(255, 0, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 0, 0, 0.8)'];
+		}
+		ldDial = [Math.abs(dMetricArrow - dMetricMin), 0.08, Math.abs(dMetricMax - dMetricArrow)];
 	}
+	//cpk or z score
 	else {
+		dRealMetricArrow = dMetricArrow;
 		if (dMetricArrow <= dMetricRed) {
+			// design value in Red zone
 			sTitle = "Risk: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "red";
 			lsLabels = ["Risk", sMetricLabel, "Risk", "Warning", "Opportunity"];
@@ -171,6 +232,7 @@ function StatisticalDial() {
 			lcHover = ['rgba(255, 0, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 0, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(0, 255, 0, 0.8)'];
 		}
 		else if (dMetricArrow <= dMetricYellow) {
+			// design value in Yellow zone
 			sTitle = "Warning: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "#b0a602";
 			lsLabels = ["Risk", "Warning", sMetricLabel, "Warning", "Opportunity"];
@@ -180,6 +242,7 @@ function StatisticalDial() {
 			lcHover = ['rgba(255, 0, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(255, 255, 0, 0.8)', 'rgba(0, 255, 0, 0.8)'];
 		}
 		else {
+			// design value in Green zone
 			sTitle = "Opportunity: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "green";
 			lsLabels = ["Risk", "Warning", "Opportunity", sMetricLabel, "Opportunity"];
@@ -188,6 +251,7 @@ function StatisticalDial() {
 			lcBackground = ['rgba(255, 0, 0, 0.6)', 'rgba(255, 255, 0, 0.6)', 'rgba(0, 255, 0, 0.6)', 'rgba(0, 0, 0, 0.6)', 'rgba(0, 255, 0, 0.6)'];
 			lcHover = ['rgba(255, 0, 0, 0.8)', 'rgba(255, 255, 0, 0.8)', 'rgba(0, 255, 0, 0.8)', 'rgba(0, 0, 0, 0.6)', 'rgba(0, 255, 0, 0.8)'];
 		}
+		ldDial = [dMetricArrow / dMetricRange, 0.01, 1 - dMetricArrow / dMetricRange];
 	}
 	
 	// chart.js
@@ -204,7 +268,7 @@ function StatisticalDial() {
 				borderWidth: 0
 			},
 			{
-				data: [dMetricArrow / dMetricRange, 0.01, 1 - dMetricArrow / dMetricRange],
+				data: ldDial,
 				backgroundColor: [
 					'rgba(0, 0, 0, 0.1)',
 					'rgba(0, 0, 0, 0.6)',
@@ -233,9 +297,14 @@ function StatisticalDial() {
 				callbacks: {
 					label: function(tooltipItem) {
 						if (tooltipItem.datasetIndex == 1 || lcHover[tooltipItem.index] == 'rgba(0, 0, 0, 0.6)') {
-							return "Design Value: " + dMetricArrow;
+							return "Design Value: " + dRealMetricArrow;
 						}
-						return lsLabels[tooltipItem.index] + ": <" + lsData[tooltipItem.index];
+						if (bLowerIsGreen) {
+							return lsLabels[tooltipItem.index] + ": > " + lsData[tooltipItem.index];
+						}
+						else {
+							return lsLabels[tooltipItem.index] + ": < " + lsData[tooltipItem.index];
+						}
 					}
 				}
 			},
