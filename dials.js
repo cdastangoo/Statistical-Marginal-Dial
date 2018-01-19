@@ -63,7 +63,7 @@ function StatisticalDial() {
 	 *     RED:    dMetric > 1000.0
 	 */
 	
-	dMetric = 1000.0;
+	dMetric = 10000.0;
 	dMetricRed = 1000.0;
 	dMetricYellow = 10.0;
 	sMetricValue = dMetric.toString();
@@ -186,7 +186,7 @@ function StatisticalDial() {
 			// design value in Green zone
 			sTitle = "Opportunity: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "green";
-			lsLabels = ["Green", sMetricLabel, "Green", "Yellow", "Red"];
+			lsLabels = ["Opportunity", sMetricLabel, "Opportunity", "Warning", "Risk"];
 			lsData = [0, dRealMetricArrow, 0, dRealMetricYellow, dRealMetricRed];
 			ldData = [dMetricArrow - dMetricMin, 0.08, dMetricYellow - dMetricArrow, dMetricRed - dMetricYellow, dMetricMax - dMetricRed];
 			//ldData = [Math.abs(dMetricArrow) / dMetricRange, 0.01, Math.abs(dMetricYellow - dMetricArrow) / dMetricRange, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricMax - dMetricRed) / dMetricRange];
@@ -197,7 +197,7 @@ function StatisticalDial() {
 			// design value in Yellow zone
 			sTitle = "Warning: " + sMetricLabel + " = " + sMetricValue;
 			sTitleColor = "#b0a602";
-			lsLabels = ["Green", "Yellow", sMetricLabel, "Yellow", "Red"];
+			lsLabels = ["Opportunity", "Warning", sMetricLabel, "Warning", "Risk"];
 			lsData = [0, dRealMetricYellow, dRealMetricArrow, dRealMetricYellow, dRealMetricRed];
 			ldData = [dMetricYellow - dMetricMin, dMetricArrow - dMetricYellow, 0.08, dMetricRed - dMetricArrow, dMetricMax - dMetricRed];
 			//ldData = [Math.abs(dMetricYellow) / dMetricRange, Math.abs(dMetricArrow - dMetricYellow) / dMetricRange, 0.01, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricMax - dMetricRed) / dMetricRange];
@@ -209,7 +209,7 @@ function StatisticalDial() {
 			console.log(dMetricArrow);
 			sTitle = "Risk: " + sMetricLabel + " = " + dRealMetricArrow;
 			sTitleColor = "red";
-			lsLabels = ["Green", "Yellow", "Red", sMetricLabel, "Red"];
+			lsLabels = ["Opportunity", "Warning", "Risk", sMetricLabel, "Risk"];
 			lsData = [0, dRealMetricYellow, dRealMetricRed, dRealMetricArrow, dRealMetricRed];
 			ldData = [dMetricYellow - dMetricMin, dMetricRed - dMetricYellow, dMetricArrow - dMetricRed, 0.08, dMetricMax - dMetricArrow];
 			//ldData = [Math.abs(dMetricYellow) / dMetricRange, Math.abs(dMetricRed - dMetricYellow) / dMetricRange, Math.abs(dMetricArrow - dMetricRed) / dMetricRange, 0.01, Math.abs(dMetricMax - dMetricArrow) / dMetricRange];
@@ -297,7 +297,7 @@ function StatisticalDial() {
 				callbacks: {
 					label: function(tooltipItem) {
 						if (tooltipItem.datasetIndex == 1 || lcHover[tooltipItem.index] == 'rgba(0, 0, 0, 0.6)') {
-							return "Design Value: " + dRealMetricArrow;
+							return sMetricLabel + ": " + dRealMetricArrow;
 						}
 						if (bLowerIsGreen) {
 							return lsLabels[tooltipItem.index] + ": > " + lsData[tooltipItem.index];
@@ -508,7 +508,7 @@ function MarginalDial() {
 	dValue = dValue.toFixed(2);
 	if (dValue < dLSL) {
 		// when value is less than Lower Specification Limit
-		lsLabels = ["Red", "Design Value", "Red", "LSL", "Red", "Yellow", "Green", "Yellow", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "Design Value", "Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, dRealValue, sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dValue, 0.05, dLSL - dValue, 0.03, dRedLower - dLSL,
@@ -524,7 +524,7 @@ function MarginalDial() {
 	}
 	else if (dValue == dLSL) {
 		// when value is equal to LSL
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Yellow", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, dRealValue, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dValue, 0.05, dRedLower - dLSL,
@@ -539,7 +539,7 @@ function MarginalDial() {
 	}
 	else if (dValue <= dRedLower) {
 		// when value is in lower Red zone
-		lsLabels = ["Red", "LSL", "Red", "Design Value", "Red", "Yellow", "Green", "Yellow", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Design Value", "Risk", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealValue, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dValue - dLSL, 0.05, dRedLower - dValue,
@@ -555,7 +555,7 @@ function MarginalDial() {
 	}
 	else if (dValue <= dYellowLower) {
 		// when value is in lower Yellow zone
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Design Value", "Yellow", "Green", "Yellow", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Design Value", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealValue, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL,
@@ -571,8 +571,8 @@ function MarginalDial() {
 		];
 	}
 	else if (dValue <= dYellowUpper) {
-		// when value is in Green zone
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Design Value", "Green", "Yellow", "Red", "USL", "Red"];
+		// when value is in Opportunity zone
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Design Value", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealValue, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL, dYellowLower - dRedLower,
@@ -589,7 +589,7 @@ function MarginalDial() {
 	}
 	else if (dValue <= dRedUpper) {
 		// when value is in upper Yellow zone
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Yellow", "Design Value", "Yellow", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Design Value", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealValue, dRealRedUpper, dRealUpper, sUSL, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL,
@@ -606,7 +606,7 @@ function MarginalDial() {
 	}
 	else if (dValue < dUSL) {
 		// when value is in upper Red zone
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Yellow", "Red", "Design Value", "Red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Risk", "Design Value", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, dRealValue, sUSL, sUSL, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL,
@@ -622,7 +622,7 @@ function MarginalDial() {
 	}
 	else if (dValue == dUSL) {
 		// when value is equal to USL
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Yellow", "red", "USL", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, dRealValue, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL,
@@ -637,7 +637,7 @@ function MarginalDial() {
 	}
 	else {
 		// when value is greater than Upper Specification Limit
-		lsLabels = ["Red", "LSL", "Red", "Yellow", "Green", "Yellow", "Red", "USL", "Red", "Design Value", "Red"];
+		lsLabels = ["Risk", "LSL", "Risk", "Warning", "Opportunity", "Warning", "Risk", "USL", "Risk", "Design Value", "Risk"];
 		lsData = [sLSL, sLSL, dRealRedLower, dRealYellowLower, dRealYellowUpper, dRealRedUpper, dRealUpper, sUSL, sUSL, dRealValue, dRealUpper];
 		ldData = [
 			dLSL, 0.03, dRedLower - dLSL,
@@ -718,7 +718,7 @@ function MarginalDial() {
 						else if (lsData[tooltipItem.index - 1] >= dRealYellowUpper) {
 							return l + ": > " + lsData[tooltipItem.index - 1];
 						}
-						else if (l.startsWith("Green")) {
+						else if (l.startsWith("Opportunity")) {
 							return l + ": [" + dRealYellowLower + ", " + dRealYellowUpper + "]";
 						}
 					}
